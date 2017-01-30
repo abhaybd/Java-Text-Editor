@@ -55,17 +55,7 @@ public class TextEditor extends JFrame implements KeyListener{
 			@Override
 			public void filesDropped(File[] files) {
 				if(files.length == 1){
-					try(Scanner scanner = new Scanner(files[0])) {
-						StringBuilder builder = new StringBuilder();
-						while(scanner.hasNextLine()){
-							builder.append(scanner.nextLine() + "\n");
-						}
-						area.setText(builder.toString());
-						setTitle(files[0].getName());
-						saved = files[0];
-					} catch (FileNotFoundException e) {
-						e.printStackTrace();
-					}
+					load(files[0]);
 				}
 				else{
 					for(File file:files){
@@ -93,28 +83,27 @@ public class TextEditor extends JFrame implements KeyListener{
 	    int returnVal = chooser.showOpenDialog(this);
 	    if (returnVal == JFileChooser.APPROVE_OPTION) {
 	    	File file = chooser.getSelectedFile();
-	        try (Scanner scanner = new Scanner(file)){
-	            StringBuilder builder = new StringBuilder();
-				while(scanner.hasNextLine()){
-					builder.append(scanner.nextLine() + "\n");
-				}
-				area.setText(builder.toString());
-				this.setTitle(file.getName());
-				saved = file;
-	        } catch (FileNotFoundException e) {
-				e.printStackTrace();
-			}
+	        load(file);
 	    }
+	}
+	
+	private void load(File file){
+		try (Scanner scanner = new Scanner(file)){
+			StringBuilder builder = new StringBuilder();
+			while(scanner.hasNextLine()){
+				builder.append(scanner.nextLine() + "\n");
+			}
+			area.setText(builder.toString());
+			this.setTitle(file.getName());
+			saved = file;
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	private void saveFile(){
 		if(saved != null){
-			try (PrintWriter out = new PrintWriter(saved)){
-	            out.print(area.getText());
-	            out.flush();
-	        } catch (Exception ex) {
-	            ex.printStackTrace();
-	        }
+			write(saved);
 		}
 		else{
 			JFileChooser chooser = new JFileChooser();
@@ -125,15 +114,27 @@ public class TextEditor extends JFrame implements KeyListener{
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				File file = chooser.getSelectedFile();
 				if(chooser.getFileFilter() == filter && !file.getName().endsWith(".txt")) file = new File(chooser.getSelectedFile() + ".txt");
-				try (PrintWriter out = new PrintWriter(file)){
-					out.print(area.getText());
-					out.flush();
-					this.setTitle(file.getName());
-					saved = file;
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
+				write(file);
+				this.setTitle(file.getName());
+				saved = file;
 			}
+		}
+		if(this.getTitle().endsWith("*")) {
+			System.out.println(this.getTitle());
+			System.out.println(this.getTitle().substring(0, this.getTitle().length()-1));
+			if(saved != null)this.setTitle(saved.getName());
+			this.revalidate();
+		}
+	}
+	
+	private void write(File file){
+		try(PrintWriter out = new PrintWriter(file)){
+			for(String s:area.getText().split("\\n")){
+				out.println(s);
+			}
+			out.flush();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
 		}
 	}
 	

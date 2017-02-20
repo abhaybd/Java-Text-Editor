@@ -121,8 +121,9 @@ public class TextEditor extends JFrame implements KeyListener{
 		}
 		if(this.getTitle().endsWith("*")) {
 			System.out.println(this.getTitle());
-			System.out.println(this.getTitle().substring(0, this.getTitle().length()-1));
-			if(saved != null)this.setTitle(saved.getName());
+			String newTitle = this.getTitle().substring(0, this.getTitle().length()-1); 
+			System.out.println(newTitle);
+			this.setTitle(newTitle);
 			this.revalidate();
 		}
 	}
